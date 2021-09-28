@@ -562,6 +562,7 @@ abstract class AbstractSearchAsyncAction<Result extends SearchPhaseResult> exten
             final Version minNodeVersion = clusterState.nodes().getMinNodeVersion();
             final String scrollId = request.scroll() != null ? TransportSearchHelper.buildScrollId(queryResults, minNodeVersion) : null;
             final String searchContextId;
+            /** PIT_CHECKPOINT : PIT ID is built from ENCODING SEARCH CONTEXT ID */
             if (buildPointInTimeFromSearchResults()) {
                 searchContextId = SearchContextId.encode(queryResults.asList(), aliasFilter, minNodeVersion);
             } else {
@@ -637,7 +638,7 @@ abstract class AbstractSearchAsyncAction<Result extends SearchPhaseResult> exten
 
     @Override
     public final ShardSearchRequest buildShardSearchRequest(SearchShardIterator shardIt) {
-        AliasFilter filter = aliasFilter.get(shardIt.shardId().getIndex().getUUID());
+        AliasFilter filter = aliasFilter.get(shardIt.shardId().getIndex().getUUID()); /**PIT_CHECKPOINT : Build alias filter */
         assert filter != null;
         float indexBoost = concreteIndexBoosts.getOrDefault(shardIt.shardId().getIndex().getUUID(), DEFAULT_INDEX_BOOST);
         String indexName = shardIt.shardId().getIndex().getName();

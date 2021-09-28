@@ -698,6 +698,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         }
     }
 
+    /** PIT_CHECKPOINT : Create a reader context for pit
     /**
      * Opens the reader context for given shardId. The newly opened reader context will be keep
      * until the {@code keepAlive} elapsed unless it is manually released.

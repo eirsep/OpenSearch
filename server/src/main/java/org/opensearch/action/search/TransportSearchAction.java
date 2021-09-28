@@ -264,6 +264,9 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
                                   ActionListener<SearchPhaseResult> listener);
     }
 
+    /**
+     * PIT_CHECKPOTNT - This method is unused and has a bool called includeSearchContext??? but it has buildPointInTimeFromSearchResults()
+     */
     public void executeRequest(Task task, SearchRequest searchRequest, String actionName,
                                boolean includeSearchContext, SinglePhaseSearchAction phaseSearchAction,
                                ActionListener<SearchResponse> listener) {
@@ -320,6 +323,7 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
             final ClusterState clusterState = clusterService.state();
             final SearchContextId searchContext;
             final Map<String, OriginalIndices> remoteClusterIndices;
+            /** PIT_CHECKPOINT : FROM PIT, GET SEARCH CONTEXT WHICH PROVIDES THE INDICES, PREFERENCES, ROUTINGS, INDICES OPTION etc */
             if (searchRequest.pointInTimeBuilder() != null) {
                 searchContext = SearchContextId.decode(namedWriteableRegistry, searchRequest.pointInTimeBuilder().getId());
                 remoteClusterIndices = getIndicesFromSearchContexts(searchContext, searchRequest.indicesOptions());
@@ -538,7 +542,7 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
                                     ClusterState clusterState, ActionListener<SearchResponse> listener,
                                     SearchContextId searchContext,
                                     SearchAsyncActionProvider searchAsyncActionProvider) {
-        executeSearch((SearchTask)task, timeProvider, searchRequest, localIndices, Collections.emptyList(),
+        executeSearch((SearchTask) task, timeProvider, searchRequest, localIndices, Collections.emptyList(),
             (clusterName, nodeId) -> null, clusterState, Collections.emptyMap(), listener, SearchResponse.Clusters.EMPTY,
             searchContext, searchAsyncActionProvider);
     }
@@ -651,6 +655,7 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
         final Map<String, Set<String>> indexRoutings;
 
         final String[] concreteLocalIndices;
+        /** PIT_CHECKPOINT : GET SHARD ITERATORS STORED IN PIT instead of creating new ones */
         if (searchContext != null) {
             assert searchRequest.pointInTimeBuilder() != null;
             aliasFilter = searchContext.aliasFilter();
@@ -753,14 +758,14 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
         SearchSourceBuilder source = searchRequest.source();
         Integer preFilterShardSize = searchRequest.getPreFilterShardSize();
         if (preFilterShardSize == null
-                && (hasReadOnlyIndices(indices, clusterState) || hasPrimaryFieldSort(source))) {
+            && (hasReadOnlyIndices(indices, clusterState) || hasPrimaryFieldSort(source))) {
             preFilterShardSize = 1;
         } else if (preFilterShardSize == null) {
             preFilterShardSize = SearchRequest.DEFAULT_PRE_FILTER_SHARD_SIZE;
         }
         return searchRequest.searchType() == QUERY_THEN_FETCH // we can't do this for DFS it needs to fan out to all shards all the time
-                    && (SearchService.canRewriteToMatchNone(source) || hasPrimaryFieldSort(source))
-                    && preFilterShardSize < numShards;
+            && (SearchService.canRewriteToMatchNone(source) || hasPrimaryFieldSort(source))
+            && preFilterShardSize < numShards;
     }
 
     private static boolean hasReadOnlyIndices(String[] indices, ClusterState clusterState) {
@@ -924,7 +929,7 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
                     FinalResponse response;
                     try {
                         response = createFinalResponse();
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         originalListener.onFailure(e);
                         return;
                     }
@@ -964,6 +969,7 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
             final SearchContextIdForNode perNode = entry.getValue();
             if (Strings.isEmpty(perNode.getClusterAlias())) {
                 final ShardId shardId = entry.getKey();
+                /** PIT_CHECKPOINT : Why is the result of getShards() not being used? Seems like a bug*/
                 OperationRouting.getShards(clusterState, shardId);
                 final List<String> targetNodes = Collections.singletonList(perNode.getNode());
                 iterators.add(new SearchShardIterator(localClusterAlias, shardId, targetNodes, originalIndices,

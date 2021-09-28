@@ -142,4 +142,5 @@ public final class Text implements Comparable<Text>, ToXContentFragment {
             return builder.utf8Value(br.bytes, br.offset, br.length);
         }
     }
+
 }

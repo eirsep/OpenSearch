@@ -37,10 +37,14 @@ import org.apache.lucene.index.FilterDirectoryReader;
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.AlreadyClosedException;
+import org.opensearch.action.ActionFuture;
 import org.opensearch.action.ActionListener;
 import org.opensearch.action.OriginalIndices;
 import org.opensearch.action.index.IndexResponse;
 import org.opensearch.action.search.ClearScrollRequest;
+import org.opensearch.action.search.CreatePITAction;
+import org.opensearch.action.search.PITRequest;
+import org.opensearch.action.search.PITResponse;
 import org.opensearch.action.search.SearchPhaseExecutionException;
 import org.opensearch.action.search.SearchRequest;
 import org.opensearch.action.search.SearchResponse;
@@ -89,6 +93,7 @@ import org.opensearch.search.aggregations.MultiBucketConsumerService;
 import org.opensearch.search.aggregations.bucket.global.GlobalAggregationBuilder;
 import org.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.opensearch.search.aggregations.support.ValueType;
+import org.opensearch.search.builder.PointInTimeBuilder;
 import org.opensearch.search.builder.SearchSourceBuilder;
 import org.opensearch.search.fetch.FetchSearchResult;
 import org.opensearch.search.fetch.ShardFetchRequest;
@@ -215,14 +220,22 @@ public class SearchServiceTests extends OpenSearchSingleNodeTestCase {
         return Settings.builder().put("search.default_search_timeout", "5s").build();
     }
 
-    public void testClearOnClose() {
-        createIndex("index");
+    public void testPIT() throws ExecutionException, InterruptedException {
+        createIndex("index", Settings.builder().put("index.number_of_shards", 2).put("index.number_of_replicas", 0).build());
         client().prepareIndex("index", "type", "1").setSource("field", "value").setRefreshPolicy(IMMEDIATE).get();
-        SearchResponse searchResponse = client().prepareSearch("index").setSize(1).setScroll("1m").get();
-        assertThat(searchResponse.getScrollId(), is(notNullValue()));
+
+        PITRequest request = new PITRequest(TimeValue.timeValueDays(1), new String[]{"index"});
+        request.setKeepAlive(TimeValue.timeValueDays(1));
+        request.setIndices(new String[]{"index"});
+        ActionFuture<PITResponse> execute = client().execute(CreatePITAction.INSTANCE, request);
+        PITResponse pitResponse = execute.get();
+        client().prepareIndex("index", "type", "2").setSource("field", "value").setRefreshPolicy(IMMEDIATE).get();
+        SearchResponse searchResponse = client().prepareSearch("index")
+            .setSize(2).setPointInTime(new PointInTimeBuilder(pitResponse.getId()).setKeepAlive(TimeValue.timeValueDays(1))).get();
+        assertHitCount(searchResponse, 1);
         SearchService service = getInstanceFromNode(SearchService.class);
 
-        assertEquals(1, service.getActiveContexts());
+        assertEquals(2, service.getActiveContexts());
         service.doClose(); // this kills the keep-alive reaper we have to reset the node after this test
         assertEquals(0, service.getActiveContexts());
     }

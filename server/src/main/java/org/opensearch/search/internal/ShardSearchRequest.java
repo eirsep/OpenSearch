@@ -109,7 +109,7 @@ public class ShardSearchRequest extends TransportRequest implements IndicesReque
                               ShardId shardId,
                               int numberOfShards,
                               AliasFilter aliasFilter,
-                              float indexBoost,
+                                  float indexBoost,
                               long nowInMillis,
                               @Nullable String clusterAlias,
                               String[] indexRoutings) {
