@@ -43,6 +43,8 @@ import org.opensearch.action.OriginalIndices;
 import org.opensearch.action.index.IndexResponse;
 import org.opensearch.action.search.ClearScrollRequest;
 import org.opensearch.action.search.CreatePITAction;
+import org.opensearch.action.search.DeletePITAction;
+import org.opensearch.action.search.DeletePITRequest;
 import org.opensearch.action.search.PITRequest;
 import org.opensearch.action.search.PITResponse;
 import org.opensearch.action.search.SearchPhaseExecutionException;
@@ -224,8 +226,7 @@ public class SearchServiceTests extends OpenSearchSingleNodeTestCase {
         createIndex("index", Settings.builder().put("index.number_of_shards", 2).put("index.number_of_replicas", 0).build());
         client().prepareIndex("index", "type", "1").setSource("field", "value").setRefreshPolicy(IMMEDIATE).get();
 
-        PITRequest request = new PITRequest(TimeValue.timeValueDays(1), new String[]{"index"});
-        request.setKeepAlive(TimeValue.timeValueDays(1));
+        PITRequest request = new PITRequest(TimeValue.timeValueDays(1));
         request.setIndices(new String[]{"index"});
         ActionFuture<PITResponse> execute = client().execute(CreatePITAction.INSTANCE, request);
         PITResponse pitResponse = execute.get();
@@ -236,8 +237,9 @@ public class SearchServiceTests extends OpenSearchSingleNodeTestCase {
         SearchService service = getInstanceFromNode(SearchService.class);
 
         assertEquals(2, service.getActiveContexts());
-        service.doClose(); // this kills the keep-alive reaper we have to reset the node after this test
+        client().execute(DeletePITAction.INSTANCE,new DeletePITRequest(pitResponse.getId()));
         assertEquals(0, service.getActiveContexts());
+        service.doClose(); // this kills the keep-alive reaper we have to reset the node after this test
     }
 
     public void testClearOnStop() {

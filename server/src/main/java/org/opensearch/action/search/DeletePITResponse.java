@@ -18,41 +18,35 @@ import org.opensearch.rest.RestStatus;
 
 import java.io.IOException;
 
-public class PITResponse extends ActionResponse implements StatusToXContentObject {
+public class DeletePITResponse extends ActionResponse implements StatusToXContentObject {
 
-    private static final ParseField ID = new ParseField("id");
+    private static final ParseField ACKNOWLEDGED = new ParseField("acknowledged");
 
-    public String getId() {
-        return id;
+    private final boolean acknowledged;
+
+    public DeletePITResponse(boolean acknowledged) {
+        this.acknowledged = acknowledged;
     }
 
-    private final String id;
-
-    PITResponse(String id) {
-        this.id = id;
-    }
-
-    public PITResponse(StreamInput streamInput) throws IOException {
-        id = streamInput.readString();
+    public DeletePITResponse(StreamInput streamInput) throws IOException {
+        acknowledged = streamInput.readBoolean();
     }
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
-        out.writeString(id);
-
+        out.writeBoolean(acknowledged);
     }
 
     @Override
     public RestStatus status() {
-        return RestStatus.OK;
+        return RestStatus.OK;//TODO
     }
 
     @Override
     public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
         builder.startObject();
-        builder.field(ID.getPreferredName(), id);
+        builder.field(ACKNOWLEDGED.getPreferredName(), acknowledged);
         builder.endObject();
         return builder;
     }
 }
-

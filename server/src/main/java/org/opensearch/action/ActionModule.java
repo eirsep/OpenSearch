@@ -239,11 +239,13 @@ import org.opensearch.action.main.MainAction;
 import org.opensearch.action.main.TransportMainAction;
 import org.opensearch.action.search.ClearScrollAction;
 import org.opensearch.action.search.CreatePITAction;
+import org.opensearch.action.search.DeletePITAction;
 import org.opensearch.action.search.MultiSearchAction;
 import org.opensearch.action.search.SearchAction;
 import org.opensearch.action.search.SearchScrollAction;
 import org.opensearch.action.search.TransportClearScrollAction;
 import org.opensearch.action.search.TransportCreatePITAction;
+import org.opensearch.action.search.TransportDeletePITAction;
 import org.opensearch.action.search.TransportMultiSearchAction;
 import org.opensearch.action.search.TransportSearchAction;
 import org.opensearch.action.search.TransportSearchScrollAction;
@@ -404,6 +406,8 @@ import org.opensearch.rest.action.ingest.RestPutPipelineAction;
 import org.opensearch.rest.action.ingest.RestSimulatePipelineAction;
 import org.opensearch.rest.action.search.RestClearScrollAction;
 import org.opensearch.rest.action.search.RestCountAction;
+import org.opensearch.rest.action.search.RestCreatePITAction;
+import org.opensearch.rest.action.search.RestDeletePITAction;
 import org.opensearch.rest.action.search.RestExplainAction;
 import org.opensearch.rest.action.search.RestMultiSearchAction;
 import org.opensearch.rest.action.search.RestSearchAction;
@@ -656,6 +660,7 @@ public class ActionModule extends AbstractModule {
         actions.register(DeleteDanglingIndexAction.INSTANCE, TransportDeleteDanglingIndexAction.class);
         actions.register(FindDanglingIndexAction.INSTANCE, TransportFindDanglingIndexAction.class);
         actions.register(CreatePITAction.INSTANCE, TransportCreatePITAction.class);
+        actions.register(DeletePITAction.INSTANCE, TransportDeletePITAction.class);
 
         return unmodifiableMap(actions.getRegistry());
     }
@@ -763,6 +768,8 @@ public class ActionModule extends AbstractModule {
         registerHandler.accept(new RestSearchAction());
         registerHandler.accept(new RestSearchScrollAction());
         registerHandler.accept(new RestClearScrollAction());
+        registerHandler.accept(new RestCreatePITAction());
+        registerHandler.accept(new RestDeletePITAction());
         registerHandler.accept(new RestMultiSearchAction(settings));
 
         registerHandler.accept(new RestValidateQueryAction());

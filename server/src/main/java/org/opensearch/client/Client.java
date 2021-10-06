@@ -58,6 +58,8 @@ import org.opensearch.action.index.IndexResponse;
 import org.opensearch.action.search.ClearScrollRequest;
 import org.opensearch.action.search.ClearScrollRequestBuilder;
 import org.opensearch.action.search.ClearScrollResponse;
+import org.opensearch.action.search.DeletePITRequest;
+import org.opensearch.action.search.DeletePITResponse;
 import org.opensearch.action.search.MultiSearchRequest;
 import org.opensearch.action.search.MultiSearchRequestBuilder;
 import org.opensearch.action.search.MultiSearchResponse;
@@ -66,6 +68,7 @@ import org.opensearch.action.search.SearchRequestBuilder;
 import org.opensearch.action.search.SearchResponse;
 import org.opensearch.action.search.SearchScrollRequest;
 import org.opensearch.action.search.SearchScrollRequestBuilder;
+import org.opensearch.action.support.master.AcknowledgedResponse;
 import org.opensearch.action.termvectors.MultiTermVectorsRequest;
 import org.opensearch.action.termvectors.MultiTermVectorsRequestBuilder;
 import org.opensearch.action.termvectors.MultiTermVectorsResponse;
@@ -426,6 +429,8 @@ public interface Client extends OpenSearchClient, Releasable {
      * Clears the search contexts associated with specified scroll ids.
      */
     ClearScrollRequestBuilder prepareClearScroll();
+
+    void deletePit(DeletePITRequest request, ActionListener<DeletePITResponse> listener);
 
     /**
      * Clears the search contexts associated with specified scroll ids.

@@ -22,11 +22,11 @@ import org.opensearch.tasks.TaskId;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 public class PITRequest extends ActionRequest implements IndicesRequest.Replaceable {
-    public PITRequest(TimeValue keepAlive, String[] indices) {
+    public PITRequest(TimeValue keepAlive) {
         this.keepAlive = keepAlive;
-        this.indices = indices;
     }
 
     public String getRouting() {
@@ -70,23 +70,33 @@ public class PITRequest extends ActionRequest implements IndicesRequest.Replacea
         out.writeTimeValue(keepAlive);
         out.writeOptionalString(routing);
     }
-    @Nullable
-    private String routing=null;
+
+    public void setRouting(String routing) {
+        this.routing = routing;
+    }
 
     @Nullable
-    private String preference=null;
+    private String routing = null;
+
+    public void setPreference(String preference) {
+        this.preference = preference;
+    }
+
+    @Nullable
+    private String preference = null;
 
     public void setIndices(String[] indices) {
         this.indices = indices;
     }
+
     private String[] indices = Strings.EMPTY_ARRAY;
 
-    private IndicesOptions indicesOptions = SearchRequest.DEFAULT_INDICES_OPTIONS;
-//    public PITRequest(String[] indices, TimeValue keepAlive) {
-//        this.keepAlive = keepAlive;
-//        this.indices = indices;
+    public void setIndicesOptions(IndicesOptions indicesOptions) {
+        this.indicesOptions = Objects.requireNonNull(indicesOptions, "indicesOptions must not be null");
+    }
 
-//    }
+    private IndicesOptions indicesOptions = SearchRequest.DEFAULT_INDICES_OPTIONS;
+
 
     @Override
     public ActionRequestValidationException validate() {
@@ -103,10 +113,7 @@ public class PITRequest extends ActionRequest implements IndicesRequest.Replacea
         return indicesOptions;
     }
 
-    @Override
-    public IndicesRequest indices(String... indices) {
-        return null;
-    }
+
 
     public void setKeepAlive(TimeValue keepAlive) {
         this.keepAlive = keepAlive;
@@ -116,4 +123,15 @@ public class PITRequest extends ActionRequest implements IndicesRequest.Replacea
     public Task createTask(long id, String type, String action, TaskId parentTaskId, Map<String, String> headers) {
         return new SearchTask(id, type, action, () -> "desc", parentTaskId, headers);
     }
+
+    /**
+     * Sets the indices the search will be executed on.
+     */
+    @Override
+    public PITRequest indices(String... indices) {
+        SearchRequest.validateIndices(indices);
+        this.indices = indices;
+        return this;
+    }
 }
+

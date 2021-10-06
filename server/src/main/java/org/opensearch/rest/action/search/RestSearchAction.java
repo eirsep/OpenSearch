@@ -392,3 +392,4 @@ public class RestSearchAction extends BaseRestHandler {
         return true;
     }
 }
+
