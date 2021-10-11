@@ -9,9 +9,8 @@
 package org.opensearch.action.search;
 
 import org.opensearch.action.ActionType;
-import org.opensearch.action.support.master.AcknowledgedResponse;
 
-public class DeletePITAction extends ActionType<DeletePITResponse> { //todo change ackResponse to something custom
+public class DeletePITAction extends ActionType<DeletePITResponse> {
 
     public static final DeletePITAction INSTANCE = new DeletePITAction();
     public static final String NAME = "indices:data/delete/pit";

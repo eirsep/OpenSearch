@@ -281,7 +281,7 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
                 return new AbstractSearchAsyncAction<SearchPhaseResult>(
                     actionName, logger, searchTransportService, connectionLookup, aliasFilter, concreteIndexBoosts,
                     indexRoutings, executor, searchRequest, listener, shardsIts, timeProvider, clusterState, task,
-                    new ArraySearchPhaseResults<>(shardsIts.size()), 1, clusters) {
+                    new ArraySearchPhaseResults<>(shardsIts.size()), 5, clusters) {
                     @Override
                     protected void executePhaseOnShard(SearchShardIterator shardIt, SearchShardTarget shard,
                                                        SearchActionListener<SearchPhaseResult> listener) {
