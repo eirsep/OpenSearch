@@ -947,7 +947,7 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
         return new RemoteTransportException("error while communicating with remote cluster [" + clusterAlias + "]", e);
     }
 
-    static Map<String, OriginalIndices> getIndicesFromSearchContexts(SearchContextId searchContext,
+    public static Map<String, OriginalIndices> getIndicesFromSearchContexts(SearchContextId searchContext,
                                                                      IndicesOptions indicesOptions) {
         final Map<String, Set<String>> indices = new HashMap<>();
         for (Map.Entry<ShardId, SearchContextIdForNode> entry : searchContext.shards().entrySet()) {
@@ -959,7 +959,7 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
             .collect(Collectors.toMap(Map.Entry::getKey, e -> new OriginalIndices(e.getValue().toArray(new String[0]), indicesOptions)));
     }
 
-    static List<SearchShardIterator> getLocalLocalShardsIteratorFromPointInTime(ClusterState clusterState,
+    public static List<SearchShardIterator> getLocalLocalShardsIteratorFromPointInTime(ClusterState clusterState,
                                                                                 OriginalIndices originalIndices,
                                                                                 String localClusterAlias,
                                                                                 SearchContextId searchContext,

@@ -53,7 +53,7 @@ public class TransportCreatePITAction extends HandledTransportAction<PITRequest,
         sr.routing(request.getRouting());
         sr.indicesOptions(request.getIndicesOptions());
         transportSearchAction.executeRequest(task, sr, CREATE_PIT, true,
-            (searchTask, target, connection, searchPhaseResultActionListener) -> transportService.sendChildRequest(connection, SearchTransportService.CREATE_READER_CONTEXT_ACTION_NAME, new CreateReaderContextRequest(target.getShardId(), request.getKeepAlive()), searchTask,
+            (searchTask, target, connection, searchPhaseResultActionListener) -> /*TODO set a timeout based on "awaitActive"*/transportService.sendChildRequest(connection, SearchTransportService.CREATE_READER_CONTEXT_ACTION_NAME, new CreateReaderContextRequest(target.getShardId(), request.getKeepAlive()), searchTask,
                 new TransportResponseHandler<CreateReaderContextResponse>() {
                     @Override
                     public CreateReaderContextResponse read(StreamInput in) throws IOException {
@@ -114,6 +114,8 @@ public class TransportCreatePITAction extends HandledTransportAction<PITRequest,
         @Override
         public void writeTo(StreamOutput out) throws IOException {
             super.writeTo(out);
+            shardId.writeTo(out);
+            out.writeTimeValue(keepAlive);
         }
     }
 
@@ -130,6 +132,7 @@ public class TransportCreatePITAction extends HandledTransportAction<PITRequest,
 
         @Override
         public void writeTo(StreamOutput out) throws IOException {
+            super.writeTo(out);
             contextId.writeTo(out);
 
         }

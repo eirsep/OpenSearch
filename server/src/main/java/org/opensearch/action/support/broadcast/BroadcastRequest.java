@@ -47,6 +47,7 @@ public class BroadcastRequest<Request extends BroadcastRequest<Request>> extends
     protected String[] indices;
     private IndicesOptions indicesOptions = IndicesOptions.strictExpandOpenAndForbidClosed();
 
+
     public BroadcastRequest(StreamInput in) throws IOException {
         super(in);
         indices = in.readStringArray();

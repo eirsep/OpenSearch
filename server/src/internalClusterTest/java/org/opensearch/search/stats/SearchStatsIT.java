@@ -227,6 +227,7 @@ public class SearchStatsIT extends OpenSearchIntegTestCase {
 
         assertThat(indicesStats.getTotal().getSearch().getOpenContexts(), equalTo((long) numAssignedShards(index)));
         assertThat(indicesStats.getTotal().getSearch().getTotal().getScrollCurrent(), equalTo((long) numAssignedShards(index)));
+        assertThat(indicesStats.getTotal().getSearch().getTotal().getPitCurrent(), equalTo(0L));
 
         int hits = 0;
         while (true) {
@@ -256,7 +257,9 @@ public class SearchStatsIT extends OpenSearchIntegTestCase {
         stats = indicesStats.getTotal().getSearch().getTotal();
         assertThat(indicesStats.getTotal().getSearch().getOpenContexts(), equalTo(0L));
         assertThat(stats.getScrollCount(), equalTo((long)numAssignedShards(index)));
+        assertThat(stats.getPitCount(), equalTo(0L));
         assertThat(stats.getScrollTimeInMillis(), greaterThan(0L));
+        assertThat(stats.getPitTimeInMillis(), equalTo(0L));
     }
 
     protected int numAssignedShards(String... indices) {

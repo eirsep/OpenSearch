@@ -40,6 +40,12 @@ import org.apache.lucene.store.AlreadyClosedException;
 import org.opensearch.action.ActionFuture;
 import org.opensearch.action.ActionListener;
 import org.opensearch.action.OriginalIndices;
+import org.opensearch.action.admin.indices.segments.IndicesSegmentResponse;
+import org.opensearch.action.admin.indices.segments.IndicesSegmentsAction;
+import org.opensearch.action.admin.indices.segments.IndicesSegmentsRequest;
+import org.opensearch.action.admin.indices.segments.IndicesSegmentsRequestBuilder;
+import org.opensearch.action.admin.indices.segments.PitSegmentsAction;
+import org.opensearch.action.admin.indices.segments.PitSegmentsRequest;
 import org.opensearch.action.index.IndexResponse;
 import org.opensearch.action.search.ClearScrollRequest;
 import org.opensearch.action.search.CreatePITAction;
@@ -112,6 +118,7 @@ import org.junit.Before;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -235,9 +242,15 @@ public class SearchServiceTests extends OpenSearchSingleNodeTestCase {
             .setSize(2).setPointInTime(new PointInTimeBuilder(pitResponse.getId()).setKeepAlive(TimeValue.timeValueDays(1))).get();
         assertHitCount(searchResponse, 1);
         SearchService service = getInstanceFromNode(SearchService.class);
-
+        PitSegmentsRequest request1 = new PitSegmentsRequest();
+        request1.setPitIds(Arrays.asList(pitResponse.getId()));
+        client().prepareIndex("index", "type", "2").setSource("field", "value").setRefreshPolicy(IMMEDIATE).get();
+        ActionFuture<IndicesSegmentResponse> e = client().execute(PitSegmentsAction.INSTANCE, request1);
+        IndicesSegmentResponse pitSegmentsResponse = e.get();
+        IndicesSegmentResponse indicesSegmentResponse = client().execute(IndicesSegmentsAction.INSTANCE, new IndicesSegmentsRequest("index")).get();
         assertEquals(2, service.getActiveContexts());
         client().execute(DeletePITAction.INSTANCE,new DeletePITRequest(pitResponse.getId()));
+
         assertEquals(0, service.getActiveContexts());
         service.doClose(); // this kills the keep-alive reaper we have to reset the node after this test
     }
@@ -249,7 +262,7 @@ public class SearchServiceTests extends OpenSearchSingleNodeTestCase {
         assertThat(searchResponse.getScrollId(), is(notNullValue()));
         SearchService service = getInstanceFromNode(SearchService.class);
 
-        assertEquals(1, service.getActiveContexts());
+        assertEquals(2, service.getActiveContexts());
         service.doClose(); // this kills the keep-alive reaper we have to reset the node after this test
         assertEquals(0, service.getActiveContexts());
     }

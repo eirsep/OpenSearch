@@ -439,6 +439,9 @@ public class RestNodesAction extends AbstractCatAction {
             table.addCell(searchStats == null ? null : searchStats.getTotal().getScrollCurrent());
             table.addCell(searchStats == null ? null : searchStats.getTotal().getScrollTime());
             table.addCell(searchStats == null ? null : searchStats.getTotal().getScrollCount());
+            table.addCell(searchStats == null ? null : searchStats.getTotal().getPitCurrent());
+            table.addCell(searchStats == null ? null : searchStats.getTotal().getPitTime());
+            table.addCell(searchStats == null ? null : searchStats.getTotal().getPitCount());
 
             SegmentsStats segmentsStats = indicesStats == null ? null : indicesStats.getSegments();
             table.addCell(segmentsStats == null ? null : segmentsStats.getCount());

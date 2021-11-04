@@ -169,7 +169,9 @@ import org.opensearch.action.admin.indices.resolve.ResolveIndexAction;
 import org.opensearch.action.admin.indices.rollover.RolloverAction;
 import org.opensearch.action.admin.indices.rollover.TransportRolloverAction;
 import org.opensearch.action.admin.indices.segments.IndicesSegmentsAction;
+import org.opensearch.action.admin.indices.segments.PitSegmentsAction;
 import org.opensearch.action.admin.indices.segments.TransportIndicesSegmentsAction;
+import org.opensearch.action.admin.indices.segments.TransportPitSegmentsAction;
 import org.opensearch.action.admin.indices.settings.get.GetSettingsAction;
 import org.opensearch.action.admin.indices.settings.get.TransportGetSettingsAction;
 import org.opensearch.action.admin.indices.settings.put.TransportUpdateSettingsAction;
@@ -661,6 +663,7 @@ public class ActionModule extends AbstractModule {
         actions.register(FindDanglingIndexAction.INSTANCE, TransportFindDanglingIndexAction.class);
         actions.register(CreatePITAction.INSTANCE, TransportCreatePITAction.class);
         actions.register(DeletePITAction.INSTANCE, TransportDeletePITAction.class);
+        actions.register(PitSegmentsAction.INSTANCE, TransportPitSegmentsAction.class);
 
         return unmodifiableMap(actions.getRegistry());
     }
